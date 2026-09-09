@@ -1,0 +1,15 @@
+venv/
+__pycache__/
+*.pyc
+*.zip
+*.m4a
+*.mp3
+*.mp4
+.env
+speech_segments/
+
+backend/ai_samples/
+backend/real_samples/
+backend/speaker_profiles/
+backend/speech_segments/
+backend/test_samples/
