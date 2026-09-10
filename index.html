@@ -1,0 +1,1475 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>VoxShield - AI Voice Security</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            font-family: Arial, sans-serif;
+            background: #08111f;
+            color: #f1f5f9;
+            display: flex;
+            justify-content: center;
+            padding: 30px 15px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 900px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 36px;
+        }
+
+        .header p {
+            color: #94a3b8;
+            margin-top: 8px;
+        }
+
+        .card {
+            background: #111b2d;
+            border: 1px solid #26354d;
+            border-radius: 20px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.25);
+        }
+
+        .status {
+            background: #182235;
+            border-radius: 12px;
+            padding: 14px;
+            margin-bottom: 20px;
+            color: #cbd5e1;
+        }
+
+        .status-dot {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #64748b;
+            margin-right: 8px;
+        }
+
+        .status-dot.active {
+            background: #00e09a;
+            box-shadow: 0 0 10px rgba(0, 224, 154, 0.8);
+        }
+
+        .buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        button {
+            border: none;
+            padding: 14px 28px;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        #startBtn {
+            background: #00d9a0;
+            color: #06131a;
+        }
+
+        #startBtn:hover {
+            transform: translateY(-2px);
+        }
+
+        #stopBtn {
+            background: #70263e;
+            color: white;
+        }
+
+        #stopBtn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .result-card {
+            display: none;
+            border-radius: 18px;
+            padding: 20px;
+            margin-top: 20px;
+            border: 1px solid #23415a;
+            background: #161f30;
+        }
+
+        .result-card.safe {
+            border-color: #00b88a;
+        }
+
+        .result-card.warning {
+            border-color: #eab308;
+        }
+
+        .result-card.danger {
+            border-color: #ef4444;
+        }
+
+        .result-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 22px;
+        }
+
+        .result-icon {
+            width: 55px;
+            height: 55px;
+            border-radius: 15px;
+            background: #202b3f;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+        }
+
+        .result-header h2 {
+            margin: 0;
+            font-size: 21px;
+        }
+
+        .result-header p {
+            margin: 7px 0 0;
+            color: #94a3b8;
+            font-size: 13px;
+        }
+
+        .score-section {
+            background: #1a2435;
+            border-radius: 16px;
+            padding: 18px;
+            margin-bottom: 18px;
+        }
+
+        .score-row,
+        .speaker-score {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+
+        .score-row span,
+        .speaker-score span {
+            color: #cbd5e1;
+        }
+
+        .score-row strong,
+        .speaker-score strong {
+            color: #f8fafc;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #263247;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 18px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            border-radius: 10px;
+        }
+
+        .human {
+            background: #00d9a0;
+        }
+
+        .ai {
+            background: #ef4444;
+        }
+
+        .speaker-section {
+            background: #1a2435;
+            border-radius: 16px;
+            padding: 18px;
+            margin-bottom: 18px;
+        }
+
+        .speaker-header {
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+
+        .speaker-status {
+            display: inline-block;
+            padding: 7px 13px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .speaker-status.safe {
+            background: rgba(0, 224, 154, 0.15);
+            color: #00e09a;
+        }
+
+        .speaker-status.danger {
+            background: rgba(239, 68, 68, 0.15);
+            color: #ff6675;
+        }
+
+        .speaker-reason {
+            color: #94a3b8;
+            font-size: 13px;
+            line-height: 1.5;
+            margin: 5px 0 0;
+        }
+
+        .risk-section {
+            border-radius: 16px;
+            padding: 20px;
+            background: #1a2435;
+        }
+
+        .risk-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 12px;
+        }
+
+        .risk-title.low {
+            color: #00e09a;
+        }
+
+        .risk-title.medium {
+            color: #eab308;
+        }
+
+        .risk-title.high {
+            color: #fb923c;
+        }
+
+        .risk-title.critical {
+            color: #ef4444;
+        }
+
+        .action-badge,
+        .security-status {
+            display: inline-block;
+            padding: 7px 12px;
+            border-radius: 20px;
+            background: #273246;
+            color: #f8fafc;
+            font-size: 12px;
+            font-weight: bold;
+            margin-right: 6px;
+        }
+
+        .risk-message {
+            color: #cbd5e1;
+            line-height: 1.5;
+        }
+
+        .prevention {
+            color: #94a3b8;
+            font-size: 13px;
+        }
+
+        .history {
+            margin-top: 20px;
+        }
+
+        .history h3 {
+            margin-top: 0;
+        }
+
+        .history-item {
+            background: #1a2435;
+            border-radius: 12px;
+            padding: 14px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .history-left {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .history-title {
+            font-weight: bold;
+        }
+
+        .history-details {
+            color: #94a3b8;
+            font-size: 12px;
+        }
+
+        .history-risk {
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .clear-btn {
+            width: 100%;
+            margin-top: 10px;
+            background: #182235;
+            color: #94a3b8;
+            border: 1px solid #2a3850;
+        }
+
+        .clear-btn:hover {
+            color: white;
+        }
+
+        .impersonation-alert {
+            background: rgba(239, 68, 68, 0.12);
+            border: 1px solid #ef4444;
+            border-radius: 14px;
+            padding: 15px;
+            margin-bottom: 18px;
+            color: #ff8a96;
+            font-weight: bold;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        @media (max-width: 600px) {
+            .header h1 {
+                font-size: 28px;
+            }
+
+            .buttons {
+                flex-direction: column;
+            }
+
+            button {
+                width: 100%;
+            }
+
+            .history-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <div class="header">
+        <h1>🛡️ VoxShield</h1>
+        <p>AI-Powered Real-Time Voice Impersonation Detection</p>
+    </div>
+
+    <div class="card">
+
+        <div class="status">
+            <span id="statusDot" class="status-dot"></span>
+            <span id="statusText">Ready to detect voice</span>
+        </div>
+
+        <div class="buttons">
+            <button id="startBtn">
+                🎙️ Start Microphone
+            </button>
+
+            <button id="stopBtn" disabled>
+                ⏹️ Stop
+            </button>
+        </div>
+
+        <div id="resultCard" class="result-card"></div>
+
+        <div class="history">
+
+            <h3>📊 Detection History</h3>
+
+            <div id="historyList"></div>
+
+            <button
+                id="clearHistoryBtn"
+                class="clear-btn">
+                🗑️ Clear Detection History
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<script>
+
+    // ============================================
+    // CONFIGURATION
+    // ============================================
+
+    const WS_URL = "ws://127.0.0.1:8000/ws/audio";
+
+    const FRAME_SAMPLES = 320;
+    const FRAME_BYTES = 640;
+    const FRAME_DURATION_MS = 20;
+
+    let audioContext = null;
+    let mediaStream = null;
+    let sourceNode = null;
+    let processorNode = null;
+    let websocket = null;
+
+    let sampleBuffer = new Float32Array(0);
+
+    let isRecording = false;
+    let detectionResultReceived = false;
+
+
+    // ============================================
+    // DOM ELEMENTS
+    // ============================================
+
+    const startBtn = document.getElementById("startBtn");
+    const stopBtn = document.getElementById("stopBtn");
+
+    const statusText = document.getElementById("statusText");
+    const statusDot = document.getElementById("statusDot");
+
+    const resultCard = document.getElementById("resultCard");
+
+    const historyList = document.getElementById("historyList");
+    const clearHistoryBtn =
+        document.getElementById("clearHistoryBtn");
+
+
+    // ============================================
+    // STATUS
+    // ============================================
+
+    function updateStatus(text, active = false) {
+
+        statusText.textContent = text;
+
+        if (active) {
+            statusDot.classList.add("active");
+        } else {
+            statusDot.classList.remove("active");
+        }
+    }
+
+
+    // ============================================
+    // START MICROPHONE
+    // ============================================
+
+    startBtn.addEventListener("click", async () => {
+
+        try {
+
+            updateStatus("Requesting microphone access...");
+
+            mediaStream =
+                await navigator.mediaDevices.getUserMedia({
+                    audio: true
+                });
+
+            audioContext =
+                new AudioContext({
+                    sampleRate: 16000
+                });
+
+            await audioContext.resume();
+
+            websocket =
+                new WebSocket(WS_URL);
+
+            websocket.binaryType = "arraybuffer";
+
+            websocket.onopen = () => {
+
+                console.log(
+                    "WebSocket connected"
+                );
+
+                updateStatus(
+                    "Listening for speech...",
+                    true
+                );
+
+                startBtn.disabled = true;
+                stopBtn.disabled = false;
+
+                isRecording = true;
+                detectionResultReceived = false;
+                sampleBuffer = new Float32Array(0);
+
+                setupAudioProcessing();
+            };
+
+
+            websocket.onmessage = (event) => {
+
+                console.log(
+                    "Backend result:",
+                    event.data
+                );
+
+                try {
+
+                    const result =
+                        JSON.parse(event.data);
+
+                    showDetectionResult(result);
+
+                    detectionResultReceived = true;
+
+                    updateStatus(
+                        "Detection completed",
+                        false
+                    );
+
+                } catch (error) {
+
+                    console.error(
+                        "Invalid backend response:",
+                        error
+                    );
+
+                }
+            };
+
+
+            websocket.onerror = (error) => {
+
+                console.error(
+                    "WebSocket error:",
+                    error
+                );
+
+                updateStatus(
+                    "WebSocket connection error"
+                );
+            };
+
+
+            websocket.onclose = () => {
+
+                console.log(
+                    "WebSocket disconnected"
+                );
+
+                if (isRecording) {
+                    updateStatus(
+                        "Connection closed"
+                    );
+                }
+            };
+
+
+        } catch (error) {
+
+            console.error(error);
+
+            updateStatus(
+                "Microphone access failed"
+            );
+
+            alert(
+                "Could not access the microphone. Please allow microphone permission."
+            );
+        }
+
+    });
+
+
+    // ============================================
+    // AUDIO PROCESSING
+    // ============================================
+
+    function setupAudioProcessing() {
+
+        sourceNode =
+            audioContext.createMediaStreamSource(
+                mediaStream
+            );
+
+        /*
+         * Chrome requires the ScriptProcessor
+         * buffer size to be a power of two.
+         */
+        processorNode =
+            audioContext.createScriptProcessor(
+                256,
+                1,
+                1
+            );
+
+
+        processorNode.onaudioprocess = (event) => {
+
+            if (!isRecording) {
+                return;
+            }
+
+            if (!websocket) {
+                return;
+            }
+
+            if (websocket.readyState !== WebSocket.OPEN) {
+                return;
+            }
+
+
+            const input =
+                event.inputBuffer.getChannelData(0);
+
+
+            const combined =
+                new Float32Array(
+                    sampleBuffer.length +
+                    input.length
+                );
+
+
+            combined.set(sampleBuffer);
+
+            combined.set(
+                input,
+                sampleBuffer.length
+            );
+
+
+            sampleBuffer = combined;
+
+
+            while (
+                sampleBuffer.length >=
+                FRAME_SAMPLES
+            ) {
+
+                const frame =
+                    sampleBuffer.slice(
+                        0,
+                        FRAME_SAMPLES
+                    );
+
+
+                sampleBuffer =
+                    sampleBuffer.slice(
+                        FRAME_SAMPLES
+                    );
+
+
+                const pcm =
+                    convertFloat32ToInt16(frame);
+
+
+                if (
+                    pcm.byteLength === FRAME_BYTES
+                ) {
+
+                    websocket.send(
+                        pcm.buffer
+                    );
+                }
+
+            }
+
+        };
+
+
+        sourceNode.connect(
+            processorNode
+        );
+
+        processorNode.connect(
+            audioContext.destination
+        );
+
+    }
+
+
+    // ============================================
+    // FLOAT32 → INT16 PCM
+    // ============================================
+
+    function convertFloat32ToInt16(float32Array) {
+
+        const int16Array =
+            new Int16Array(
+                float32Array.length
+            );
+
+
+        for (
+            let i = 0;
+            i < float32Array.length;
+            i++
+        ) {
+
+            let sample =
+                Math.max(
+                    -1,
+                    Math.min(
+                        1,
+                        float32Array[i]
+                    )
+                );
+
+
+            if (sample < 0) {
+
+                int16Array[i] =
+                    sample * 32768;
+
+            } else {
+
+                int16Array[i] =
+                    sample * 32767;
+            }
+
+        }
+
+        return int16Array;
+    }
+
+
+    // ============================================
+    // STOP MICROPHONE
+    // ============================================
+
+    stopBtn.addEventListener(
+        "click",
+        async () => {
+
+            if (!websocket) {
+                return;
+            }
+
+            updateStatus(
+                "Sending final audio..."
+            );
+
+            isRecording = false;
+
+
+            /*
+             * Send silence frames so the backend
+             * detects the end of speech.
+             */
+
+            if (
+                websocket.readyState ===
+                WebSocket.OPEN
+            ) {
+
+                const silence =
+                    new Int16Array(
+                        FRAME_SAMPLES
+                    );
+
+
+                for (
+                    let i = 0;
+                    i < 30;
+                    i++
+                ) {
+
+                    if (
+                        websocket.readyState !==
+                        WebSocket.OPEN
+                    ) {
+                        break;
+                    }
+
+
+                    websocket.send(
+                        silence.buffer.slice(0)
+                    );
+
+
+                    await sleep(
+                        FRAME_DURATION_MS
+                    );
+
+                }
+
+            }
+
+
+            updateStatus(
+                "Waiting for detection result..."
+            );
+
+
+            /*
+             * Give backend time to finish
+             * VAD + feature extraction +
+             * AI detection + speaker verification.
+             */
+
+            const startTime =
+                Date.now();
+
+
+            while (
+                !detectionResultReceived &&
+                Date.now() - startTime < 10000
+            ) {
+
+                await sleep(100);
+
+            }
+
+
+            cleanupAudio();
+
+
+            if (
+                !detectionResultReceived
+            ) {
+
+                updateStatus(
+                    "No speech segment detected"
+                );
+            }
+
+        }
+    );
+
+
+    // ============================================
+    // CLEANUP AUDIO
+    // ============================================
+
+    function cleanupAudio() {
+
+        try {
+
+            if (processorNode) {
+
+                processorNode.disconnect();
+
+                processorNode.onaudioprocess =
+                    null;
+
+                processorNode = null;
+            }
+
+
+            if (sourceNode) {
+
+                sourceNode.disconnect();
+
+                sourceNode = null;
+            }
+
+
+            if (mediaStream) {
+
+                mediaStream
+                    .getTracks()
+                    .forEach(
+                        track =>
+                            track.stop()
+                    );
+
+                mediaStream = null;
+            }
+
+
+            if (audioContext) {
+
+                audioContext.close();
+
+                audioContext = null;
+            }
+
+
+            if (
+                websocket &&
+                websocket.readyState ===
+                WebSocket.OPEN
+            ) {
+
+                websocket.close();
+            }
+
+
+        } catch (error) {
+
+            console.error(
+                "Cleanup error:",
+                error
+            );
+
+        }
+
+
+        websocket = null;
+
+        startBtn.disabled = false;
+        stopBtn.disabled = true;
+
+        sampleBuffer =
+            new Float32Array(0);
+    }
+
+
+    // ============================================
+    // SHOW DETECTION RESULT
+    // ============================================
+
+    function showDetectionResult(result) {
+
+        const isAI =
+            result.prediction === "AI";
+
+
+        const speakerMatch =
+            result.speaker_match === true;
+
+
+        const aiScore =
+            Number(
+                result.ai_score || 0
+            ).toFixed(1);
+
+
+        const realScore =
+            Number(
+                result.real_score || 0
+            ).toFixed(1);
+
+
+        const speakerScore =
+            Number(
+                result.speaker_match_score || 0
+            ).toFixed(1);
+
+
+        /*
+         * Most important combined condition:
+         *
+         * AI voice + speaker mismatch
+         * = possible impersonation
+         */
+
+        const isImpersonation =
+            isAI && !speakerMatch;
+
+
+        let title;
+        let icon;
+
+
+        if (isImpersonation) {
+
+            title =
+                "POSSIBLE VOICE IMPERSONATION";
+
+            icon = "🚨";
+
+        }
+        else if (isAI) {
+
+            title =
+                "AI VOICE DETECTED";
+
+            icon = "🤖";
+
+        }
+        else if (speakerMatch) {
+
+            title =
+                "VERIFIED HUMAN VOICE";
+
+            icon = "👤";
+
+        }
+        else {
+
+            title =
+                "SPEAKER MISMATCH DETECTED";
+
+            icon = "⚠️";
+        }
+
+
+        let speakerStatus;
+        let speakerStatusClass;
+
+
+        if (speakerMatch) {
+
+            speakerStatus =
+                "MATCH";
+
+            speakerStatusClass =
+                "safe";
+
+        } else {
+
+            speakerStatus =
+                "MISMATCH";
+
+            speakerStatusClass =
+                "danger";
+        }
+
+
+        let riskClass =
+            String(
+                result.risk_level || "LOW"
+            ).toLowerCase();
+
+
+        /*
+         * Change overall result-card appearance
+         */
+
+        resultCard.className =
+            "result-card " +
+            (
+                riskClass === "critical" ||
+                riskClass === "high"
+                    ? "danger"
+                    : riskClass === "medium"
+                    ? "warning"
+                    : "safe"
+            );
+
+
+        let impersonationAlert = "";
+
+
+        if (isImpersonation) {
+
+            impersonationAlert = `
+                <div class="impersonation-alert">
+                    🚨 POSSIBLE VOICE IMPERSONATION ATTACK
+                    <br>
+                    AI-generated characteristics detected
+                    and the voice does not match the enrolled speaker.
+                </div>
+            `;
+        }
+
+
+        resultCard.innerHTML = `
+
+            ${impersonationAlert}
+
+
+            <div class="result-header">
+
+                <div class="result-icon">
+                    ${icon}
+                </div>
+
+                <div>
+
+                    <h2>
+                        ${title}
+                    </h2>
+
+                    <p>
+                        Segment ${result.segment}
+                        •
+                        ${Number(
+                            result.duration || 0
+                        ).toFixed(2)}s
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="score-section">
+
+                <div class="score-row">
+                    <span>
+                        Human Voice
+                    </span>
+
+                    <strong>
+                        ${realScore}%
+                    </strong>
+                </div>
+
+
+                <div class="progress-bar">
+
+                    <div
+                        class="progress-fill human"
+                        style="width:${realScore}%">
+                    </div>
+
+                </div>
+
+
+                <div class="score-row">
+                    <span>
+                        AI Voice
+                    </span>
+
+                    <strong>
+                        ${aiScore}%
+                    </strong>
+                </div>
+
+
+                <div class="progress-bar">
+
+                    <div
+                        class="progress-fill ai"
+                        style="width:${aiScore}%">
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="speaker-section">
+
+                <div class="speaker-header">
+                    👤 Speaker Verification
+                </div>
+
+
+                <div class="speaker-score">
+
+                    <span>
+                        Speaker Match
+                    </span>
+
+                    <strong>
+                        ${speakerScore}%
+                    </strong>
+
+                </div>
+
+
+                <div
+                    class="speaker-status
+                    ${speakerStatusClass}">
+
+                    ${speakerStatus}
+
+                </div>
+
+
+                <p class="speaker-reason">
+
+                    ${result.speaker_reason ||
+                      "Speaker verification result unavailable."}
+
+                </p>
+
+            </div>
+
+
+            <div class="risk-section">
+
+                <div
+                    class="risk-title
+                    ${riskClass}">
+
+                    ${
+                        riskClass === "critical"
+                            ? "🚨"
+                            : riskClass === "high"
+                            ? "⚠️"
+                            : riskClass === "medium"
+                            ? "🟡"
+                            : "🟢"
+                    }
+
+                    ${result.risk_level || "LOW"} RISK
+
+                </div>
+
+
+                <span class="action-badge">
+
+                    ${result.action || "ALLOW"}
+
+                </span>
+
+
+                <span class="security-status">
+
+                    ${result.status || "SAFE"}
+
+                </span>
+
+
+                <p class="risk-message">
+
+                    ${result.message ||
+                      "No additional message available."}
+
+                </p>
+
+
+                <p class="prevention">
+
+                    🛡️
+                    ${result.prevention_description ||
+                      "No prevention action specified."}
+
+                </p>
+
+            </div>
+
+        `;
+
+
+        resultCard.style.display =
+            "block";
+
+
+        saveDetectionHistory(result);
+
+        loadDetectionHistory();
+
+    }
+
+
+    // ============================================
+    // DETECTION HISTORY
+    // ============================================
+
+    function saveDetectionHistory(result) {
+
+        let history =
+            JSON.parse(
+                localStorage.getItem(
+                    "voiceDetectionHistory"
+                ) || "[]"
+            );
+
+
+        history.unshift({
+
+            prediction:
+                result.prediction,
+
+            ai_score:
+                result.ai_score,
+
+            real_score:
+                result.real_score,
+
+            speaker_match:
+                result.speaker_match,
+
+            speaker_match_score:
+                result.speaker_match_score,
+
+            risk_level:
+                result.risk_level,
+
+            action:
+                result.action,
+
+            segment:
+                result.segment,
+
+            duration:
+                result.duration,
+
+            timestamp:
+                new Date().toLocaleString()
+
+        });
+
+
+        /*
+         * Keep latest 20 results
+         */
+
+        history =
+            history.slice(0, 20);
+
+
+        localStorage.setItem(
+            "voiceDetectionHistory",
+            JSON.stringify(history)
+        );
+
+    }
+
+
+    function loadDetectionHistory() {
+
+        const history =
+            JSON.parse(
+                localStorage.getItem(
+                    "voiceDetectionHistory"
+                ) || "[]"
+            );
+
+
+        historyList.innerHTML = "";
+
+
+        if (history.length === 0) {
+
+            historyList.innerHTML = `
+                <p style="color:#94a3b8">
+                    No detections yet.
+                </p>
+            `;
+
+            return;
+        }
+
+
+        history.forEach(item => {
+
+            const div =
+                document.createElement(
+                    "div"
+                );
+
+
+            div.className =
+                "history-item";
+
+
+            const predictionText =
+                item.prediction === "AI"
+                    ? "🤖 AI"
+                    : "👤 REAL";
+
+
+            const speakerText =
+                item.speaker_match
+                    ? "Speaker Match"
+                    : "Speaker Mismatch";
+
+
+            div.innerHTML = `
+
+                <div class="history-left">
+
+                    <div class="history-title">
+
+                        ${predictionText}
+
+                        • Segment
+                        ${item.segment}
+
+                    </div>
+
+
+                    <div class="history-details">
+
+                        ${Number(
+                            item.duration || 0
+                        ).toFixed(2)}s
+
+                        • AI Score:
+                        ${Number(
+                            item.ai_score || 0
+                        ).toFixed(1)}%
+
+                        • Speaker:
+                        ${speakerText}
+
+                    </div>
+
+                </div>
+
+
+                <div class="history-risk">
+
+                    ${item.risk_level}
+
+                    <br>
+
+                    ${item.action}
+
+                </div>
+
+            `;
+
+
+            historyList.appendChild(div);
+
+        });
+
+    }
+
+
+    // ============================================
+    // CLEAR HISTORY
+    // ============================================
+
+    clearHistoryBtn.addEventListener(
+        "click",
+        () => {
+
+            localStorage.removeItem(
+                "voiceDetectionHistory"
+            );
+
+            loadDetectionHistory();
+
+        }
+    );
+
+
+    // ============================================
+    // UTILITY
+    // ============================================
+
+    function sleep(ms) {
+
+        return new Promise(
+            resolve =>
+                setTimeout(resolve, ms)
+        );
+
+    }
+
+
+    // ============================================
+    // INITIAL LOAD
+    // ============================================
+
+    loadDetectionHistory();
+
+</script>
+
+</body>
+</html>

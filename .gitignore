@@ -1,1 +1,22 @@
-__pycache__/ 
+venv/
+__pycache__/
+*.pyc
+*.zip
+*.m4a
+*.mp3
+*.mp4
+.env
+speech_segments/
+
+backend/ai_samples/
+backend/real_samples/
+backend/speaker_profiles/
+backend/speech_segments/
+backend/test_samples/
+
+# Local Student 1 datasets and downloaded files
+data/
+librispeech_real.parquet
+en_US-lessac-medium.onnx
+en_US-lessac-medium.onnx.json
+models_saved/*_backup.pth

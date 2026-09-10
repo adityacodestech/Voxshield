@@ -1,0 +1,11 @@
+file,actual,predicted,real_score,ai_score,correct
+speech_024.wav,REAL,REAL,57.0,43.0,True
+speech_027.wav,REAL,REAL,97.0,3.0,True
+speech_029.wav,REAL,REAL,97.0,3.0,True
+speech_031.wav,REAL,REAL,89.5,10.5,True
+speech_032.wav,REAL,REAL,97.5,2.5,True
+ai_test_01.wav,AI,AI,0.5,99.5,True
+ai_test_02.wav,AI,AI,12.0,88.0,True
+ai_test_03.wav,AI,AI,10.5,89.5,True
+ai_test_04.wav,AI,AI,7.5,92.5,True
+ai_test_05.wav,AI,AI,11.5,88.5,True
