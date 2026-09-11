@@ -2,6 +2,8 @@ from fastapi import FastAPI
 
 from backend_student5.app.routes.health import router as health_router
 from backend_student5.app.routes.analysis import router as analysis_router
+from backend_student5.app.routes.audio import router as audio_router
+
 
 app = FastAPI(
     title="AI Voice Security API",
@@ -9,15 +11,9 @@ app = FastAPI(
     version="1.0.0",
 )
 
-app.include_router(
-    health_router,
-    prefix="/api/v1"
-)
-
-app.include_router(
-    analysis_router,
-    prefix="/api/v1"
-)
+app.include_router(health_router, prefix="/api/v1")
+app.include_router(analysis_router, prefix="/api/v1")
+app.include_router(audio_router)
 
 
 @app.get("/")

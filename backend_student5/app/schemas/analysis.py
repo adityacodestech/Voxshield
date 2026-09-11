@@ -1,5 +1,5 @@
+from typing import Optional, List
 from pydantic import BaseModel
-from typing import Optional
 
 
 class DetectionResult(BaseModel):
@@ -10,11 +10,18 @@ class DetectionResult(BaseModel):
     model_version: str
 
 
+class RiskResult(BaseModel):
+    risk_score: Optional[int] = None
+    severity: str
+    action: str
+    reasons: List[str]
+
+
 class AnalysisResponse(BaseModel):
     analysis_id: str
     filename: str
     content_type: Optional[str] = None
     status: str
     detection: DetectionResult
-    risk: Optional[dict] = None
+    risk: Optional[RiskResult] = None
     audit: Optional[dict] = None
