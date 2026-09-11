@@ -19,6 +19,7 @@ data/
 librispeech_real.parquet
 en_US-lessac-medium.onnx
 en_US-lessac-medium.onnx.json
+
 models_saved/*_backup.pth
 
 # Student 5 backend uploaded audio
