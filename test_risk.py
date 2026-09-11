@@ -355,3 +355,53 @@ if result["severity"] == "UNKNOWN" and result["action"] == "SECONDARY_VERIFICATI
     print("Test 21 PASSED - Infinity triggered fail-safe")
 else:
     print("Test 21 FAILED - Infinity was not handled safely")
+
+
+
+# Test 22 - AI Detector Integration
+
+ai_detector_result = {
+    "prediction": "AI_GENERATED",
+    "ai_probability": 0.94,
+    "genuine_probability": 0.06,
+    "threshold": 0.60,
+    "model_version": "voxshield-v1"
+}
+
+risk_result = get_risk_result(
+    ai_detector_result["ai_probability"],
+    0.80,   # speaker mismatch
+    0.70,   # caller risk
+    0.60,   # transaction risk
+    0.50    # behavioral risk
+)
+
+print("Test 22 - AI Detector → Risk Engine:")
+print(risk_result)
+
+
+
+# Test 23 - Real AI Detector Integration
+
+from inference.detector import detect_voice
+
+audio_file = "test_samples/ai/ai_test_01.wav"
+
+try:
+    detector_result = detect_voice(audio_file)
+
+    risk_result = get_risk_result(
+        detector_result["ai_probability"],
+        0.80,   # temporary speaker mismatch test value
+        0.70,   # temporary caller risk test value
+        0.60,   # temporary transaction risk test value
+        0.50    # temporary behavioral risk test value
+    )
+
+    print("\nTest 23 - Real AI Detector → Risk Engine:")
+    print("AI Detector Result:", detector_result)
+    print("Risk Engine Result:", risk_result)
+
+except Exception as e:
+    print("\nTest 23 FAILED")
+    print("Reason:", e)
