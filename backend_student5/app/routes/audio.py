@@ -8,6 +8,7 @@ from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 
 from inference.detector import detect_voice
 from risk_engine import get_risk_result
+from backend_student5.app.services.blockchain_audit import record_risk_score
 
 from backend_student5.app.services.audio_pipeline import (
     create_audio_pipeline,
@@ -105,6 +106,8 @@ async def audio_stream(websocket: WebSocket):
                     segment["audio"]
                 )
 
+                audit = record_risk_score(int(risk["risk_score"]))
+
                 await websocket.send_json({
                     "status": "analyzed",
 
@@ -117,7 +120,7 @@ async def audio_stream(websocket: WebSocket):
 
                     "risk": risk,
 
-                    "audit": None,
+                    "audit": audit,
                 })
 
             except Exception as exc:

@@ -3,6 +3,8 @@ from pathlib import Path
 import uuid
 
 from inference.detector import detect_voice
+from risk_engine import get_risk_result
+from backend_student5.app.services.blockchain_audit import record_risk_score
 from backend_student5.app.schemas.analysis import AnalysisResponse
 
 router = APIRouter()
@@ -54,15 +56,24 @@ async def analyze_audio(file: UploadFile = File(...)):
         # Send audio to Student 1 detector
         detection_result = detect_voice(str(file_path))
 
+        risk_result = get_risk_result(
+            ai_probability=float(detection_result["ai_probability"]),
+            speaker_mismatch=0.0,
+            caller_risk=0.0,
+            transaction_risk=0.0,
+            behavioral_risk=0.0,
+        )
+
+        audit_result = record_risk_score(int(risk_result["risk_score"]))
+
         return {
             "analysis_id": analysis_id,
             "filename": file.filename,
-            "saved_file": str(file_path),
             "content_type": file.content_type,
             "status": "analyzed",
             "detection": detection_result,
-            "risk": None,
-            "audit": None
+            "risk": risk_result,
+            "audit": audit_result
         }
 
     except HTTPException:
